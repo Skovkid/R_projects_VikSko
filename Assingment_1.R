@@ -32,7 +32,7 @@ life_exp%>%
   head(3) -> top_list
 
 
-#Making a bar chart for each list
+#3. Making a bar chart for each list
 
 #Bottom three
 bottom_list%>%
@@ -50,7 +50,7 @@ top_list%>%
 
 
 
-#Mergin together the graphs of top and bottom
+#4. Mergin together the graphs of top and bottom
 
 top_list <- 
   top_list%>%
@@ -84,41 +84,53 @@ colnames(continents) <- c("country","continent")
 
 inner_join(life_exp, continents) -> mer_cont  #This is number 4
 group_by(continent)
-#This is attempt at nr 5
+
+
+#5. Calculating the averages of each continent
+
 
 mer_cont %>%
   arrange(continent)%>%
   select(life_expectancy,continent)
+
+
   
 africa_data <- mer_cont %>%
   filter(continent == "Africa")
   mean(africa_data$life_expectancy) -> mean_afr
 
+  
+  
 europe_data <- mer_cont %>%
   filter(continent == "Europe")
   mean(europe_data$life_expectancy) -> mean_eur
+  
+  
   
 asia_data <- mer_cont %>%
     filter(continent == "Asia")
     mean(asia_data$life_expectancy) -> mean_asia
 
+    
+    
 americas_data <- mer_cont%>%
   filter(continent == "Americas")
   mean(americas_data$life_expectancy) -> mean_amer
+  
+  
 
 oceania_data <- mer_cont%>%
   filter(continent == "Oceania")
   mean(oceania_data$life_expectancy) -> mean_oce
+  
+  
   
 tibble(
   Continent = c("Africa","America", "Asia", "Europe", "Oceania"),
   Average = c(mean_afr, mean_amer,mean_asia,mean_eur,mean_oce)
   )-> avg
 
-#Hard coded solution to the problem but at least there's a table with the values of the different continents.
-
-view(avg)
-
+#6. An optional diagram showing life expectancy for each continent
 
 
 avg %>%
