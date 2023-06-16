@@ -1,5 +1,6 @@
 library(tidyverse)
 library(ggplot2) 
+library(stargazer)
 
 # Assignment instructions
 #1. Calculate mean and median for all variables that are numeric. Explain what they show.
@@ -79,6 +80,14 @@ Gini_hist %>%
 
 
 
+#This is the kind of funciton I was trying to implement but didn't manage to due because of my limited knowledge and know-how.
+
+#for (i in 1:length(histograms)) {
+ # histograms[i] <- ggsave(filename = as_string(i), device = "png)
+#}
+
+
+
 
 #3.
 
@@ -94,3 +103,33 @@ Gini_hist %>%
 
 # b) save the results in a table 
 
+
+
+
+#Regression model
+
+# Y = a+b*X*u
+
+
+
+#Saving the model in an object
+
+#I hate my own code and feel really incompetent doing this but I am not aware capable of finding another solution :´(
+
+lg_model_1 <- life_exp$life_expectancy ~ log(gdp)
+lg_model_2 <- life_exp$life_expectancy ~log(women_econ_op)
+lg_model_3 <- life_exp$life_expectancy ~log(gini)
+
+
+#Calculating the model with the lm-model (I hate this :( )
+
+lg_estimation_1 <- lm(lg_model_1, data = life_exp)#gdp
+lg_estimation_2 <- lm(lg_model_2, data = life_exp) #women
+lg_estimation_3 <- lm(lg_model_3, data = life_exp)#gini
+
+
+
+#Solving part B
+
+Reg_table <- stargazer(lg_estimation_1,lg_estimation_2,lg_estimation_3, type = "text", digits=1)
+Reg_table
