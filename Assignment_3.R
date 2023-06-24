@@ -76,7 +76,7 @@ library(tm)
 library(ggplot2)
 
 
-df <- fromJSON(paste(readLines('tweets_1week_climate_str.json'), collapse=""))
+df <- fromJSON(paste(readLines('8k_tweets_1week_climate.json'), collapse=""))
 
 
 # 3. How many observations are in your data?
@@ -85,20 +85,24 @@ df <- fromJSON(paste(readLines('tweets_1week_climate_str.json'), collapse=""))
 
 # 4. What is the location from which the largest number of tweets has been posted?
 
-df %>% 
-  count(place) %>% 
-  arrange(desc(n))
+df %>%  #Data frame
+  count(location) %>% #selects to count the location column 
+  arrange(desc(n)) #Arranges the result in descending order. The results refer to the number of instances
+
+#The highest number is from Catalunya as observered from the result of the code above
 
 # 5. How many observations contain the word “crisis”? Provide the code.
 
 df$text %>%
   str_detect("crisis") %>%
-  sum()
+  sum() #Result is 423
 
 # 6. Split the data into tokens with unnest_tokens.
 
 df %>% 
   unnest_tokens(word, text)
+
+#Just unnests the entire document
 
 # 7. Remove the stop words. Provide the code.
 
@@ -140,7 +144,7 @@ ggplot(freq, aes(x = n)) +
 
 
 #The frequency differs significantly between the different categories.
-#The words that were used the most (climatestrike) was to a large extent just the 
+#The words that were used the most (climateemergency) were disproportionally more frequent than the other ones. 
 
 # 10. Apply stemming to your data and build a histogram of the most frequent words. What do you see?
 
@@ -149,17 +153,17 @@ freq <- df %>%
   anti_join(custom_stopwords) %>% 
   mutate(word=wordStem(word)) %>% 
   count(word, sort=T) %>% 
-  top_n(20, n)
+  top_n(20, n)  #This is the code for the stemming of the data.
 
 ggplot(freq, aes(x = reorder(word, n), y = n)) +
   geom_col() +
   labs(title="Twitter ", x = NULL, y = "Frequency") +
-  coord_flip()
+  coord_flip() #Here is the general histogram.
 
 # 11. Remove number from the data. Describe what you see.
 
 freq <- df %>% 
-  mutate(text=removeNumbers(text)) %>% # remove numbers
+  mutate(text=removeNumbers(text)) %>% # removes all the numbers
   unnest_tokens(word, text) %>% 
   anti_join(custom_stopwords) %>% 
   mutate(word=wordStem(word)) %>% 
@@ -171,3 +175,6 @@ ggplot(freq, aes(x = reorder(word, n), y = n)) +
   geom_col() +
   labs(title="Twitter ", x = NULL, y = "Frequency") +
   coord_flip()
+
+#What I can observe is the thirty most commonly used words under our search-term. Here, the frequency is disproportionally
+#tilted to the word cimteemerg and climatecrisi
