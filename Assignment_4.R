@@ -7,7 +7,7 @@
 #install.packages("stringr")
 #install.packages("reshape2")
 #install.packages("wordcloud")
-install.packages("ggpubr")
+#install.packages("ggpubr")
 
 #Loading Libraries*************************
 
@@ -19,6 +19,64 @@ library(stringr)
 library(reshape2)
 library(wordcloud)
 library(ggpubr)
+
+
+
+
+
+#Below this line is the sentiment analysis************************************************************************************
+
+
+
+#Now we start our sentiment analysis for August_Strindberg by calling a git lexicon for sentiment analysis.
+#I was not able to follow the books instructions since the parsing of the table was unsuccessful in loading the values.
+#Therefore I manually downloaded the JSON file from the developers GitHub
+# LINK: https://github.com/AlexGustafsson/sentiment-swedish/blob/develop/build/AFINN-sv-165.txt
+
+
+sentiments_swedish_raw <- read_table("AFINN-sv-165.txt") 
+
+#Upon loading we realized that there were errors in the read.table function
+#Because there were many string values that contained spaces between them. 
+#The read_table made it possible to store data in a df however, very messy data
+
+colnames(sentiments_swedish_raw) <- c("word", "score") 
+
+#After a couple of hours trying to fix this error of the table we finally 
+#at this solution were now there are many words in a df combined with scores.
+
+#There are however values that are non numeric in the rows and we therefore have to clean the table of such instances.
+
+glimpse(sentiments_swedish_raw)
+
+sentiments_swedish <- sentiments_swedish_raw%>%
+  mutate(
+    word=str_trim(word),
+    score = as.integer(str_trim(score)))
+
+#All NA-values removed from the data. We can now use the sentiments values for analysis. 
+
+sentiments_swedish<-drop_na(sentiments_swedish) 
+
+
+#Now we procure doubles and delete them from our sentiment analysis
+
+sentiments_swedish <- sentiments_swedish %>% 
+  arrange(word) %>%
+  mutate(is_duplicate=
+           if_else(word == lag(word, 1), TRUE, FALSE)) %>% #Here we created a new variable to check if there is a duplicate value 
+  filter(is_duplicate == FALSE) %>% 
+  select(-is_duplicate)
+
+
+#No we have gotten rid of the duplicate text values and NA score values. Therefore the data cleaning is done and we are ready
+#To apply our analysis of the book August_Strindberg. 
+
+
+#Now we will join he table created for the book August_Strindberg with the table of sentiment analysis
+
+
+
 
 
 
@@ -71,58 +129,6 @@ August_Strindberg_words %>%  head(10)
 
 
 
-#Below this line is the sentiment analysis************************************************************************************
-
-
-
-#Now we start our sentiment analysis for August_Strindberg by calling a git lexicon for sentiment analysis.
-#I was not able to follow the books instructions since the parsing of the table was unsuccessful in loading the values.
-#Therefore I manually downloaded the JSON file from the developers GitHub
-# LINK: https://github.com/AlexGustafsson/sentiment-swedish/blob/develop/build/AFINN-sv-165.txt
-
-
-sentiments_swedish_raw <- read_table("AFINN-sv-165.txt") 
-
-#Upon loading we realized that there were errors in the read.table function
-#Because there were many string values that contained spaces between them. 
-#The read_table made it possible to store data in a df however, very messy data
-
-colnames(sentiments_swedish_raw) <- c("word", "score") 
-
-#After a couple of hours trying to fix this error of the table we finally 
-#at this solution were now there are many words in a df combined with scores.
-
-#There are however values that are non numeric in the rows and we therefore have to clean the table of such instances.
-
-glimpse(sentiments_swedish_raw)
-
-sentiments_swedish <- sentiments_swedish_raw%>%
-  mutate(
-    word=str_trim(word),
-    score = as.integer(str_trim(score)))
-
-#All NA-values removed from the data. We can now use the sentiments values for analysis. 
-
-sentiments_swedish<-drop_na(sentiments_swedish) 
-
-
-#Now we procure doubles and delete them from our sentiment analysis
-
-sentiments_swedish <- sentiments_swedish %>% 
-  arrange(word) %>%
-  mutate(is_duplicate=
-           if_else(word == lag(word, 1), TRUE, FALSE)) %>% #Here we created a new variable to check if there is a duplicate value 
-  filter(is_duplicate == FALSE) %>% 
-  select(-is_duplicate)
-
-
-#No we have gotten rid of the duplicate text values and NA score values. Therefore the data cleaning is done and we are ready
-#To apply our analysis of the book August_Strindberg. 
-  
-  
-#Now we will join he table created for the book August_Strindberg with the table of sentiment analysis
-
-
 #Below this line WE JOIN THE SENTIMENT ANALYSIS WITH THE BOOKS************************** 
 
 
@@ -138,7 +144,7 @@ August_Strindberg_words <- August_Strindberg_words %>%
 
 August_Strindberg_words %>% 
   filter(score == 0) %>% 
-  nrow() #Looking at this we can see that we have out of 45,360 words analyzed 42,476 which is 93% of the words in the entire book
+  nrow() 
  
 
 #Let's represent this in a histogram
@@ -199,7 +205,7 @@ Selma_Lagerlof_words %>%  head(10)
 Selma_Lagerlof_words<- Selma_Lagerlof_words %>% 
   left_join(sentiments_swedish, by = "word")
 
-Selma_Lagerlof_words    #This is a simple left join in all honesty.
+Selma_Lagerlof_words    #This is a simple left join.
 
 Selma_Lagerlof_words <- Selma_Lagerlof_words %>% 
   mutate(score = replace_na(score, 0)) #Replacing words that are out-of-bounds for our analysis in the 0 score category.
@@ -208,7 +214,7 @@ Selma_Lagerlof_words <- Selma_Lagerlof_words %>%
 
 Selma_Lagerlof_words %>% 
   filter(score == 0) %>% 
-  nrow() #Looking at this we can see that we have out of 45,360 words analyzed 42,476 which is 93% of the words in the entire book
+  nrow() 
 
 
 #Let's represent this in a histogram
@@ -221,7 +227,7 @@ Selma_Lagerlof_words %>%
   labs(
     x = "Sentiment points", y="Quantity",
     title = "Selma Lagerlof",
-    subtitle = "Distribution of sentimentpoints of Selma Lagerlof's works"
+    subtitle = "Distribution Selma Lagerlof"
   ) -> Selma_Chart
 
 
@@ -271,7 +277,7 @@ Viktor_Rydberg_words <- Viktor_Rydberg_words %>%
 
 Viktor_Rydberg_words %>% 
   filter(score == 0) %>% 
-  nrow() #Looking at this we can see that we have out of 45,360 words analyzed 42,476 which is 93% of the words in the entire book
+  nrow() 
 
 
 #Let's represent this in a histogram
@@ -286,20 +292,6 @@ Viktor_Rydberg_words %>%
     title = "Viktor Rydberg",
     subtitle = "Distribution Viktor Rydberg"
   ) -> Rydberg_Chart
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -313,7 +305,7 @@ gw_Sig_Str <- gw%>%
 gut_id_Sig_Str<-c(gw_Sig_Str$gutenberg_id)
 
 Sigge_Stromberg <- gutenberg_download( 
-  gutenberg_id = gut_id_Selm_Lag,
+  gutenberg_id = gut_id_Sig_Str,
   meta_fields = c("title"),
   mirror = "http://www.gutenberg.org/dirs/"
 )
@@ -349,29 +341,23 @@ Sigge_Stromberg_words <- Sigge_Stromberg_words %>%
 
 Sigge_Stromberg_words %>% 
   filter(score == 0) %>% 
-  nrow() #Looking at this we can see that we have out of 45,360 words analyzed 42,476 which is 93% of the words in the entire book
+  nrow() 
 
 
 #Let's represent this in a histogram
 
+area.color <- c(Sigge_Stromberg_words$score>0)
+
 Sigge_Stromberg_words %>% 
   filter(!score == 0) %>% #removing 0-value words
-  ggplot(aes(x=score)) +
-  geom_bar(fill = 'blue') +
+  ggplot(aes(x=score,)) +
+  geom_bar()+
   scale_x_continuous(breaks = seq(-5,5,1)) %>% 
   labs(
     x = "Sentiment points Sigge", y="Quantity",
     title = "Sigge Söderström",
-    subtitle = "Distribution of Sigge Söderström"
+    subtitle = "Distribution Sigge Söderström"
   ) -> Sigge_Chart
-Sigge_Chart
-
-
-
-
-
-
-
 
 
 
@@ -423,7 +409,7 @@ Hjalmar_Soderberg_words <- Hjalmar_Soderberg_words %>%
 
 Hjalmar_Soderberg_words %>% 
   filter(score == 0) %>% 
-  nrow() #Looking at this we can see that we have out of 45,360 words analyzed 42,476 which is 93% of the words in the entire book
+  nrow() 
 
 
 #Let's represent this in a histogram
@@ -436,10 +422,9 @@ Hjalmar_Soderberg_words %>%
   labs(
     x = "Sentiment points", y="Quantity",
     title = "Hjalmar Söderberg",
-    subtitle = "Distribution of Hjalmar Söderberg"
+    subtitle = "Distribution Hjalmar Söderberg"
   )-> Hjalmar_Chart
 
 #Trying to plot multiple bar charts next to eachother
 
 ggarrange(Strindberg_Chart,Selma_Chart,Hjalmar_Chart,Sigge_Chart,Rydberg_Chart)
-
