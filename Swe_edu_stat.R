@@ -5,7 +5,7 @@ library(dplyr)
 
 #Load in the data from SCB about education
 
-Swe_edu <- readxl::read_xlsx("C:/Users/Viktor/Documents/Programering/R projekt/Edu_stat_Swe/tab10_2022.xlsx")
+#Swe_edu <- readxl::read_xlsx("Edu_stat_Swe/tab10_2022.xlsx")
 
 
 #browse
